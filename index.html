@@ -151,7 +151,8 @@ footer{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
     <label class="f">اسم مدير/ة المدرسة<input type="text" data-k="principal"></label>
   </div>
   <div class="btnrow">
-    <button class="btn" id="copyBtn">📋 نسخ التقرير كاملًا</button>
+    <button class="btn" id="pdfBtn">📄 حفظ PDF</button>
+    <button class="btn ghost" id="copyBtn">📋 نسخ التقرير كاملًا</button>
     <button class="btn danger" id="resetBtn">مسح الاستمارة</button>
   </div>
   <div class="hint">تُحفظ إجاباتك تلقائيًا في هذا المتصفح. انسخ التقرير والصقه في رسالة أو مستند لإرساله.</div>
@@ -296,6 +297,134 @@ document.getElementById("copyBtn").addEventListener("click",async()=>{
     let ok=false;try{ok=document.execCommand("copy");}catch(_){}
     ta.remove();toast(ok?"تم نسخ التقرير ✓":"تعذّر النسخ في هذا العارض");
   }
+});
+
+/* ===== PDF (رسم على canvas بنفس تخطيط الاستمارة الأصلية) ===== */
+async function renderPages(){
+  try{await Promise.all([document.fonts.load('400 14px Tajawal'),document.fonts.load('700 14px Tajawal')]);}catch(e){}
+  const W=794,H=1123,M=34,SC=2,R=W-M,CW=W-2*M;
+  const TEAL="#0f6e6e",SOFT="#e6f3f2",LINE="#9fb8b6",INK="#1d2b2b";
+  const pages=[];let ctx,y;
+  const F=(s,b)=>`${b?700:400} ${s}px Tajawal, "Geeza Pro", "Segoe UI", Arial, sans-serif`;
+  function newPage(){const c=document.createElement("canvas");c.width=W*SC;c.height=H*SC;ctx=c.getContext("2d");ctx.scale(SC,SC);ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);ctx.direction="rtl";ctx.textBaseline="middle";pages.push(c);y=M;}
+  const ensure=h=>{if(y+h>H-M-18)newPage();};
+  function txt(t,x,yy,size,o={}){ctx.font=F(size,o.b);ctx.fillStyle=o.c||INK;ctx.textAlign=o.a||"right";ctx.fillText(t,x,yy);}
+  function wrap(t,maxW,size,b){ctx.font=F(size,b);const out=[];for(const p of String(t||"").split("\n")){let line="";for(const w of p.split(/\s+/)){if(!w)continue;const tst=line?line+" "+w:w;if(ctx.measureText(tst).width>maxW&&line){out.push(line);line=w;}else line=tst;}out.push(line);}return out;}
+  function box(x,yy,w,h,fill,stroke=LINE){if(fill){ctx.fillStyle=fill;ctx.fillRect(x,yy,w,h);}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=.8;ctx.strokeRect(x,yy,w,h);}}
+  function lines(ls,xr,yy,h,size,lh,o={}){const top=yy+(h-ls.length*lh)/2;ls.forEach((l,i)=>txt(l,xr,top+lh*(i+.5),size,o));}
+  function tick(cx,cy){ctx.strokeStyle=TEAL;ctx.lineWidth=2.2;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(cx-7,cy);ctx.lineTo(cx-2,cy+5);ctx.lineTo(cx+8,cy-6);ctx.stroke();}
+  const f=S.f;
+  newPage();
+  // ترويسة
+  txt("الإدارة العامة للتعليم بمنطقة عسير",R,y+8,12,{b:1});
+  txt("الشؤون التعليمية",R,y+25,10.5,{c:"#555"});
+  txt("إدارة أداء التعليم – قسم الإشراف التربوي",R,y+41,10.5,{c:"#555"});
+  txt("وزارة التعليم",M,y+16,15,{b:1,c:TEAL,a:"left"});
+  y+=62;ctx.fillStyle=TEAL;ctx.fillRect(M,y,CW,2);y+=22;
+  txt("استمارة التقويم الذاتي لتفعيل مهارات التفكير العليا",W/2,y,19,{b:1,c:TEAL,a:"center"});y+=24;
+  // بيانات
+  const info=[[["اسم المعلم/ـة",f.teacher],["المدرسة",f.school],["الصف",f.grade]],[["التخصص",f.subject],["الدرس/الوحدة",f.lesson],["التاريخ",f.date||"    /    /1448هـ"]]];
+  const pw=CW/3,lw=78,rh=28;
+  info.forEach(row=>{row.forEach(([l,v],i)=>{const xr=R-i*pw;box(xr-lw,y,lw,rh,SOFT);txt(l+":",xr-6,y+rh/2,11,{b:1});box(xr-pw,y,pw-lw,rh);txt(v||"",xr-lw-6,y+rh/2,11.5);});y+=rh;});
+  y+=14;
+  txt("الهدف: تعزيز الممارسات المحفزة لمهارات التفكير العليا، وتحديد أولويات تحسين تعلم الطلبة.",R,y,11);y+=18;
+  txt("التعليمات: ضع/ي علامة (✓) واحدة لكل مؤشر: ٥ عالية جدًا | ٤ عالية | ٣ متوسطة | ٢ منخفضة | ١ منخفضة جدًا.",R,y,11,{b:1});y+=16;
+  // جدول المؤشرات
+  const mW=30,vW=38,iW=CW-mW-5*vW;
+  const colX=v=>R-mW-iW-(5-v+1)*vW; // x اليسار لعمود القيمة v
+  const head=()=>{const h=26;box(M,y,CW,h,TEAL,TEAL);txt("م",R-mW/2,y+h/2,11.5,{b:1,c:"#fff",a:"center"});txt("المؤشر/ الممارسة التدريسية",R-mW-iW/2,y+h/2,11.5,{b:1,c:"#fff",a:"center"});for(let v=5;v>=1;v--)txt(ar(v),colX(v)+vW/2,y+h/2,12,{b:1,c:"#fff",a:"center"});y+=h;};
+  ensure(60);head();
+  DATA.forEach((d,di)=>{
+    ensure(22+26);if(y===M)head();
+    box(M,y,CW,22,"#d3e9e7");txt(`${ar(di+1)}. ${d.t}`,R-8,y+11,11.5,{b:1,c:TEAL});y+=22;
+    ITEMS.filter(i=>i.d===di).forEach(it=>{
+      const ls=wrap(it.txt,iW-14,11);const h=Math.max(24,ls.length*15+8);
+      ensure(h);if(y===M)head();
+      box(R-mW,y,mW,h);txt(ar(it.id),R-mW/2,y+h/2,11,{a:"center"});
+      box(R-mW-iW,y,iW,h);lines(ls,R-mW-7,y,h,11,15);
+      for(let v=5;v>=1;v--){const x=colX(v);box(x,y,vW,h);
+        if(S.r[it.id]===v){ctx.fillStyle="#eef7f6";ctx.fillRect(x+1,y+1,vW-2,h-2);tick(x+vW/2,y+h/2);}
+        else{ctx.strokeStyle="#b9c9c8";ctx.lineWidth=.8;ctx.strokeRect(x+vW/2-5,y+h/2-5,10,10);}}
+      y+=h;
+    });
+  });
+  // ملخص النتائج
+  const vals=Object.values(S.r);
+  if(vals.length){
+    const a=vals.reduce((x,z)=>x+z,0)/vals.length;
+    const doms=DATA.map((d,di)=>{const v=ITEMS.filter(i=>i.d===di&&S.r[i.id]).map(i=>S.r[i.id]);return v.length?`${d.t.split(" ").slice(0,2).join(" ")}: ${fmt(v.reduce((x,z)=>x+z,0)/v.length)}`:null;}).filter(Boolean);
+    const ls=wrap("متوسطات المجالات — "+doms.join("  |  "),CW-16,10.5);
+    const h=26+ls.length*15+6;ensure(h);
+    box(M,y,CW,h,"#f6faf9");
+    txt(`المتوسط العام: ${fmt(a)} من ٥  (${ar(Math.round(a/5*100))}٪)  —  مستوى الممارسة: ${level(a)}`,R-8,y+14,12,{b:1,c:TEAL});
+    ls.forEach((l,i)=>txt(l,R-8,y+30+i*15,10.5,{c:"#444"}));
+    y+=h;
+  }
+  y+=12;
+  // التأمل الذاتي
+  ensure(24+46);txt("التأمل الذاتي وخطوة التحسين:",R,y+8,12.5,{b:1,c:TEAL});y+=20;
+  const lbW=170;
+  [["الممارسات الناجحة المنفذة من المعلم/ـة",f.success],["أولويات التطوير",f.priorities],["خطوة التحسين القادمة",f.next]].forEach(([l,v])=>{
+    const ls=wrap(v,CW-lbW-16,10.5);const ll=wrap(l,lbW-14,11,1);
+    const h=Math.max(46,ls.length*15+12,ll.length*15+12);
+    ensure(h);
+    box(R-lbW,y,lbW,h,SOFT);lines(ll,R-8,y,h,11,15,{b:1});
+    box(M,y,CW-lbW,h);if(v)lines(ls,R-lbW-8,y,h,10.5,15);
+    y+=h;
+  });
+  y+=12;
+  // التوقيعات
+  ensure(70);const sh=62,sw=CW/3;
+  box(R-sw,y,sw,sh);box(M+sw,y,sw,sh);box(M,y,sw,sh);
+  txt("اسم المعلم/ـة: "+(f.teacherSign||f.teacher||""),R-8,y+20,11.5,{b:1});txt("التوقيع:",R-8,y+44,11.5);
+  txt("الختم",W/2,y+sh/2,12,{b:1,c:"#777",a:"center"});
+  txt("اسم مدير/ة المدرسة: "+(f.principal||""),M+sw-8,y+20,11.5,{b:1});txt("التوقيع:",M+sw-8,y+44,11.5);
+  y+=sh;
+  // تذييل في كل صفحة
+  pages.forEach((c,i)=>{const g=c.getContext("2d");g.direction="rtl";g.textBaseline="middle";g.font=F(9.5);g.fillStyle="#666";g.textAlign="center";
+    g.fillText("تُسلَّم الاستمارة للجنة التميز بالمدرسة لتحديد أولويات التطوير المهني في التخطيط والتنفيذ والتقويم.",W/2,H-M+4);
+    if(pages.length>1){g.textAlign="left";g.fillText(`${ar(i+1)} / ${ar(pages.length)}`,M,H-M+4);}});
+  return pages;
+}
+function buildPDF(imgs){
+  const enc=new TextEncoder(),parts=[],offs=[];let len=0;
+  const push=x=>{const b=typeof x==="string"?enc.encode(x):x;parts.push(b);len+=b.length;};
+  const obj=(n,body)=>{offs[n]=len;push(`${n} 0 obj\n`);body();push("\nendobj\n");};
+  const n=imgs.length,total=2+3*n;
+  push("%PDF-1.4\n%âãÏÓ\n");
+  obj(1,()=>push("<< /Type /Catalog /Pages 2 0 R >>"));
+  obj(2,()=>push(`<< /Type /Pages /Count ${n} /Kids [${imgs.map((_,i)=>`${3+3*i} 0 R`).join(" ")}] >>`));
+  imgs.forEach((im,i)=>{
+    const p=3+3*i,c=p+1,x=p+2;
+    obj(p,()=>push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 ${x} 0 R >> >> /Contents ${c} 0 R >>`));
+    const cs="q 595.28 0 0 841.89 0 0 cm /Im0 Do Q";
+    obj(c,()=>push(`<< /Length ${cs.length} >>\nstream\n${cs}\nendstream`));
+    obj(x,()=>{push(`<< /Type /XObject /Subtype /Image /Width ${im.w} /Height ${im.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${im.bytes.length} >>\nstream\n`);push(im.bytes);push("\nendstream");});
+  });
+  const xref=len;
+  let t=`xref\n0 ${total+1}\n0000000000 65535 f \n`;
+  for(let i=1;i<=total;i++)t+=String(offs[i]).padStart(10,"0")+" 00000 n \n";
+  t+=`trailer\n<< /Size ${total+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  push(t);
+  return new Blob(parts,{type:"application/pdf"});
+}
+const jpegBytes=c=>{const s=atob(c.toDataURL("image/jpeg",0.92).split(",")[1]);const b=new Uint8Array(s.length);for(let i=0;i<s.length;i++)b[i]=s.charCodeAt(i);return b;};
+let dlNS;if(window.claude&&claude.use){claude.use("downloads").then(d=>dlNS=d).catch(()=>{});}
+document.getElementById("pdfBtn").addEventListener("click",async()=>{
+  const btn=document.getElementById("pdfBtn");btn.disabled=true;const old=btn.textContent;btn.textContent="جارٍ التجهيز…";
+  try{
+    const pages=await renderPages();
+    const blob=buildPDF(pages.map(c=>({w:c.width,h:c.height,bytes:jpegBytes(c)})));
+    const name=`التقويم الذاتي - ${(S.f.teacher||"المعلم").trim()}.pdf`;
+    if(dlNS){
+      try{await dlNS.save({filename:name,data:blob});toast("تم حفظ PDF ✓");}
+      catch(e){toast(e&&e.code==="declined"?"تم الإلغاء":"تعذّر الحفظ في هذا العارض");}
+    }else{
+      const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),60000);toast("تم إنشاء PDF ✓");
+    }
+  }catch(e){console.error(e);toast("حدث خطأ أثناء إنشاء PDF");}
+  btn.disabled=false;btn.textContent=old;
 });
 
 const modal=document.getElementById("modal");
