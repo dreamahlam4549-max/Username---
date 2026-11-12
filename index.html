@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>استمارة التقويم الذاتي لتفعيل مهارات التفكير العليا</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#0f6e6e; --teal-2:#14898a; --teal-soft:#e6f3f2; --ink:#1d2b2b; --muted:#5f6f6f;
+  --line:#d7e3e2; --bg:#f5f8f8; --card:#fff; --amber:#c98a12; --red:#c0392b; --green:#1e8a4c;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Tajawal",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;font-size:16px}
+.wrap{max-width:880px;margin:0 auto;padding:16px 14px 120px}
+header.top{background:linear-gradient(135deg,var(--teal),var(--teal-2));color:#fff;border-radius:18px;padding:20px 18px;margin-bottom:16px}
+header.top .org{font-size:13px;opacity:.9;line-height:1.5}
+header.top h1{font-size:22px;margin:10px 0 6px;font-weight:800}
+header.top p{margin:0;font-size:14px;opacity:.95}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.card h2{margin:0 0 12px;font-size:17px;color:var(--teal);display:flex;align-items:center;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+label.f{display:flex;flex-direction:column;font-size:13px;color:var(--muted);gap:4px}
+input[type=text],textarea{font:inherit;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fbfdfd;width:100%}
+input:focus,textarea:focus{outline:2px solid var(--teal-2);outline-offset:0;border-color:transparent}
+textarea{min-height:84px;resize:vertical}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:13px;margin-top:8px}
+.legend span{background:var(--teal-soft);color:var(--teal);padding:3px 10px;border-radius:99px}
+
+/* progress bar sticky */
+.sticky{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0 10px}
+.prog{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:12px}
+.bar{flex:1;height:10px;background:#e8efee;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--teal-2);transition:width .3s}
+.prog b{font-size:14px;white-space:nowrap}
+
+/* domain */
+.domain-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.domain-head h2{margin:0}
+.badge{font-size:13px;font-weight:700;padding:3px 10px;border-radius:99px;background:#eef2f2;color:var(--muted);white-space:nowrap}
+.item{border-top:1px dashed var(--line);padding:12px 0}
+.item:first-of-type{border-top:none}
+.item .q{display:flex;gap:10px;font-size:15px;margin-bottom:8px}
+.item .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--teal-soft);color:var(--teal);display:grid;place-items:center;font-weight:700;font-size:13px}
+.item.done .n{background:var(--teal);color:#fff}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding-right:38px}
+.scale button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.2;color:var(--ink);transition:all .15s}
+.scale button b{font-size:17px}
+.scale button small{font-size:10.5px;color:var(--muted)}
+.scale button:hover{border-color:var(--teal-2)}
+.scale button.on{color:#fff;border-color:transparent}
+.scale button.on small{color:#fff;opacity:.9}
+.scale button.on[data-v="5"]{background:#1e8a4c}
+.scale button.on[data-v="4"]{background:#4fa36b}
+.scale button.on[data-v="3"]{background:#c98a12}
+.scale button.on[data-v="2"]{background:#d9682b}
+.scale button.on[data-v="1"]{background:#c0392b}
+
+/* results */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:var(--teal-soft);border-radius:14px;padding:12px;text-align:center}
+.kpi .v{font-size:28px;font-weight:800;color:var(--teal)}
+.kpi .l{font-size:13px;color:var(--muted)}
+.dbar{margin:8px 0}
+.dbar .t{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px}
+.dbar .track{height:12px;background:#e8efee;border-radius:99px;overflow:hidden}
+.dbar .track i{display:block;height:100%;width:0;border-radius:99px;transition:width .4s}
+ul.list{margin:6px 0 0;padding-right:20px;font-size:14px}
+ul.list li{margin-bottom:4px}
+.sub{font-weight:700;margin-top:12px;font-size:15px}
+.empty{color:var(--muted);font-size:14px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{font:inherit;font-weight:700;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--teal);color:#fff}
+.btn.ghost{background:#fff;color:var(--teal);border:1px solid var(--teal)}
+.btn.small{padding:6px 10px;font-size:13px}
+.btn.danger{background:#fff;color:var(--red);border:1px solid var(--red)}
+.hint{font-size:12.5px;color:var(--muted);margin-top:6px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:12px;font-size:14px;transition:transform .3s;z-index:20}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:30;padding:16px}
+.modal.show{display:flex}
+.modal .box{background:#fff;border-radius:16px;padding:20px;max-width:360px;width:100%;text-align:center}
+footer{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
+@media (max-width:520px){
+  .scale{padding-right:0}
+  .scale button small{font-size:9.5px}
+  header.top h1{font-size:19px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="org">الإدارة العامة للتعليم بمنطقة عسير · الشؤون التعليمية<br>إدارة أداء التعليم – قسم الإشراف التربوي</div>
+  <h1>استمارة التقويم الذاتي لتفعيل مهارات التفكير العليا</h1>
+  <p>الهدف: تعزيز الممارسات المحفزة لمهارات التفكير العليا، وتحديد أولويات تحسين تعلم الطلبة.</p>
+</header>
+
+<section class="card">
+  <h2>البيانات الأساسية</h2>
+  <div class="grid">
+    <label class="f">اسم المعلم/ـة<input type="text" data-k="teacher"></label>
+    <label class="f">المدرسة<input type="text" data-k="school"></label>
+    <label class="f">الصف<input type="text" data-k="grade"></label>
+    <label class="f">التخصص<input type="text" data-k="subject"></label>
+    <label class="f">الدرس/الوحدة<input type="text" data-k="lesson"></label>
+    <label class="f">التاريخ<input type="text" data-k="date" placeholder="   /   /1448هـ"></label>
+  </div>
+  <div class="hint">التعليمات: اختر/ي تقديرًا واحدًا لكل مؤشر.</div>
+  <div class="legend"><span>٥ عالية جدًا</span><span>٤ عالية</span><span>٣ متوسطة</span><span>٢ منخفضة</span><span>١ منخفضة جدًا</span></div>
+</section>
+
+<div class="sticky">
+  <div class="prog"><b id="progTxt">٠ / ١٦</b><div class="bar"><i id="progBar"></i></div><b id="progPct">٠٪</b></div>
+</div>
+
+<div id="domains"></div>
+
+<section class="card" id="results">
+  <h2>📊 النتائج الفورية</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="v" id="kAvg">–</div><div class="l">المتوسط العام (من ٥)</div></div>
+    <div class="kpi"><div class="v" id="kPct">–</div><div class="l">النسبة المئوية</div></div>
+    <div class="kpi"><div class="v" id="kLvl" style="font-size:20px">–</div><div class="l">مستوى الممارسة</div></div>
+  </div>
+  <div id="dbars"></div>
+  <div class="sub">✅ أبرز الممارسات المتحققة (٤ فأعلى)</div>
+  <div id="strengths"><div class="empty">ستظهر هنا بعد التقدير.</div></div>
+  <div class="sub">🎯 أولويات التطوير المقترحة (٢ فأقل)</div>
+  <div id="needs"><div class="empty">ستظهر هنا بعد التقدير.</div></div>
+</section>
+
+<section class="card">
+  <h2>التأمل الذاتي وخطوة التحسين</h2>
+  <label class="f">الممارسات الناجحة المنفذة من المعلم/ـة
+    <textarea data-k="success"></textarea></label>
+  <div class="btnrow" style="margin:6px 0 12px"><button class="btn ghost small" data-fill="success">تعبئة تلقائية من النتائج</button></div>
+  <label class="f">أولويات التطوير
+    <textarea data-k="priorities"></textarea></label>
+  <div class="btnrow" style="margin:6px 0 12px"><button class="btn ghost small" data-fill="priorities">تعبئة تلقائية من النتائج</button></div>
+  <label class="f">خطوة التحسين القادمة
+    <textarea data-k="next"></textarea></label>
+</section>
+
+<section class="card">
+  <h2>الاعتماد</h2>
+  <div class="grid">
+    <label class="f">اسم المعلم/ـة (للتوقيع)<input type="text" data-k="teacherSign"></label>
+    <label class="f">اسم مدير/ة المدرسة<input type="text" data-k="principal"></label>
+  </div>
+  <div class="btnrow">
+    <button class="btn" id="copyBtn">📋 نسخ التقرير كاملًا</button>
+    <button class="btn danger" id="resetBtn">مسح الاستمارة</button>
+  </div>
+  <div class="hint">تُحفظ إجاباتك تلقائيًا في هذا المتصفح. انسخ التقرير والصقه في رسالة أو مستند لإرساله.</div>
+</section>
+
+<footer>تُسلَّم الاستمارة للجنة التميز بالمدرسة لتحديد أولويات التطوير المهني في التخطيط والتنفيذ والتقويم.<br>إعداد: يوسف محمد منصور الزامل</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal"><div class="box">
+  <p style="margin-top:0;font-weight:700">هل تريد مسح جميع الإجابات؟</p>
+  <div class="btnrow" style="justify-content:center">
+    <button class="btn danger" id="yesReset">نعم، امسح</button>
+    <button class="btn ghost" id="noReset">إلغاء</button>
+  </div>
+</div></div>
+
+<script>
+const DATA=[
+ {t:"البيئة الصفية المحفزة للتفكير",i:[
+  "البيئة آمنة تراعي الفروق الفردية، وأتعامل مع الخطأ بوصفه فرصة للتعلم.",
+  "أشجع طرح الأسئلة بحرية، وأمنح الطلبة وقتًا كافيًا للتفكير قبل الإجابة.",
+  "أطرح أسئلة مفتوحة تستدعي تبرير الإجابات بالأدلة واحترام وجهات النظر.",
+  "أوظف الحوار والتعلم التعاوني، وأتيح للجميع فرص المشاركة وتبادل الأفكار."]},
+ {t:"دمج مهارات التفكير في التخطيط",i:[
+  "أربط مهارات التفكير بأهداف الدرس، وأدرجها في التقويم البنائي والختامي.",
+  "أخطط أنشطة متدرجة من الفهم إلى التحليل والاستنتاج والاستدلال بالأدلة.",
+  "أصمم أسئلة وأنشطة للمقارنة والتصنيف وربط المفاهيم وتفسير المعلومات.",
+  "أخطط مواقف لحل المشكلات واتخاذ القرارات وتنمية التفكير الناقد والإبداعي."]},
+ {t:"توظيف مهارات التفكير أثناء التنفيذ",i:[
+  "أبدأ بموقف محفز يربط المعرفة السابقة بالجديدة، وأطرح أسئلة تحليلية.",
+  "أطلب من الطلبة توضيح خطوات تفكيرهم وتبريرها، ومقارنة الحلول وتقييمها.",
+  "أكلف الطلبة بتطبيق تعلمهم في مواقف حياتية جديدة واقتراح حلول مبتكرة.",
+  "أقدم تغذية راجعة تطور التفكير، وأعدل التدريس وفق استجابات الطلبة."]},
+ {t:"تقويم مهارات التفكير وقياس أثرها",i:[
+  "أستخدم مهام تقيس التفسير والتحليل وتبرير الإجابات والاستدلال وحل المشكلات.",
+  "أوظف التقويم الذاتي وتقويم الأقران وفق معايير واضحة عند ملاءمتهما.",
+  "أستثمر نتائج التقويم لتحديد جوانب القوة والاحتياج، وتحسين الأسئلة والأنشطة.",
+  "أوثق نماذج من أعمال الطلبة وأقيس تطور التفكير وجودة الإجابات وعمق الفهم."]}
+];
+const LBL={5:"عالية جدًا",4:"عالية",3:"متوسطة",2:"منخفضة",1:"منخفضة جدًا"};
+const ar=n=>String(n).replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
+const KEY="hots-self-eval-v1";
+let S={r:{},f:{}};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.r)S=s;}catch(e){}
+const DEF={teacher:"أحلام راشد",teacherSign:"أحلام راشد",principal:"زهراء مفلح"};
+for(const k in DEF){if(!S.f[k])S.f[k]=DEF[k];}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
+
+// build
+const host=document.getElementById("domains");
+let idx=0;const ITEMS=[];
+DATA.forEach((d,di)=>{
+  const sec=document.createElement("section");sec.className="card";
+  sec.innerHTML=`<div class="domain-head"><h2>${ar(di+1)}. ${d.t}</h2><span class="badge" id="db${di}">–</span></div>`;
+  d.i.forEach(txt=>{
+    idx++;const id=idx;ITEMS.push({id,txt,d:di});
+    const el=document.createElement("div");el.className="item";el.id="it"+id;
+    el.innerHTML=`<div class="q"><span class="n">${ar(id)}</span><span>${txt}</span></div><div class="scale">${
+      [5,4,3,2,1].map(v=>`<button type="button" data-id="${id}" data-v="${v}"><b>${ar(v)}</b><small>${LBL[v]}</small></button>`).join("")}</div>`;
+    sec.appendChild(el);
+  });
+  host.appendChild(sec);
+});
+
+host.addEventListener("click",e=>{
+  const b=e.target.closest("button[data-v]");if(!b)return;
+  const id=b.dataset.id,v=+b.dataset.v;
+  if(S.r[id]===v)delete S.r[id];else S.r[id]=v;
+  save();render();
+});
+
+document.querySelectorAll("[data-k]").forEach(el=>{
+  el.value=S.f[el.dataset.k]||"";
+  el.addEventListener("input",()=>{S.f[el.dataset.k]=el.value;save();});
+});
+
+const color=a=>a>=4.5?"#1e8a4c":a>=3.5?"#4fa36b":a>=2.5?"#c98a12":a>=1.5?"#d9682b":"#c0392b";
+const level=a=>a>=4.5?"متميز":a>=3.5?"متقدم":a>=2.5?"متوسط":a>=1.5?"بحاجة لتطوير":"بحاجة لدعم";
+const fmt=x=>ar(x.toFixed(2).replace(/\.?0+$/,""));
+
+function render(){
+  ITEMS.forEach(it=>{
+    const el=document.getElementById("it"+it.id);
+    el.classList.toggle("done",!!S.r[it.id]);
+    el.querySelectorAll("button").forEach(b=>b.classList.toggle("on",S.r[it.id]===+b.dataset.v));
+  });
+  const vals=Object.values(S.r),n=vals.length;
+  document.getElementById("progTxt").textContent=`${ar(n)} / ${ar(16)}`;
+  document.getElementById("progBar").style.width=(n/16*100)+"%";
+  document.getElementById("progPct").textContent=ar(Math.round(n/16*100))+"٪";
+  let dbh="";
+  DATA.forEach((d,di)=>{
+    const v=ITEMS.filter(i=>i.d===di&&S.r[i.id]).map(i=>S.r[i.id]);
+    const a=v.length?v.reduce((x,y)=>x+y,0)/v.length:0;
+    const bd=document.getElementById("db"+di);
+    bd.textContent=v.length?`${fmt(a)} / ٥`:"–";
+    bd.style.background=v.length?color(a):"";bd.style.color=v.length?"#fff":"";
+    dbh+=`<div class="dbar"><div class="t"><span>${d.t}</span><b>${v.length?fmt(a):"–"}</b></div><div class="track"><i style="width:${a/5*100}%;background:${color(a)}"></i></div></div>`;
+  });
+  document.getElementById("dbars").innerHTML=dbh;
+  if(n){
+    const a=vals.reduce((x,y)=>x+y,0)/n;
+    kAvg.textContent=fmt(a);kPct.textContent=ar(Math.round(a/5*100))+"٪";
+    kLvl.textContent=level(a);kLvl.style.color=color(a);
+  }else{kAvg.textContent=kPct.textContent=kLvl.textContent="–";}
+  const st=ITEMS.filter(i=>S.r[i.id]>=4),nd=ITEMS.filter(i=>S.r[i.id]&&S.r[i.id]<=2).sort((x,y)=>S.r[x.id]-S.r[y.id]);
+  strengths.innerHTML=st.length?`<ul class="list">${st.map(i=>`<li>${i.txt} <b>(${ar(S.r[i.id])})</b></li>`).join("")}</ul>`:`<div class="empty">${n?"لا توجد مؤشرات بتقدير ٤ فأعلى بعد.":"ستظهر هنا بعد التقدير."}</div>`;
+  let needList=nd;
+  if(!nd.length&&n){needList=ITEMS.filter(i=>S.r[i.id]===3);}
+  needs.innerHTML=needList.length?`<ul class="list">${needList.map(i=>`<li>${i.txt} <b>(${ar(S.r[i.id])})</b></li>`).join("")}</ul>${!nd.length?'<div class="hint">لا توجد مؤشرات منخفضة؛ عُرضت المؤشرات المتوسطة كفرص للتحسين.</div>':""}`:`<div class="empty">${n?"لا توجد أولويات ملحّة — أداء ممتاز!":"ستظهر هنا بعد التقدير."}</div>`;
+}
+render();
+
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200);}
+
+document.querySelectorAll("[data-fill]").forEach(b=>b.addEventListener("click",()=>{
+  const k=b.dataset.fill;
+  let list=k==="success"?ITEMS.filter(i=>S.r[i.id]>=4):ITEMS.filter(i=>S.r[i.id]&&S.r[i.id]<=2);
+  if(k==="priorities"&&!list.length)list=ITEMS.filter(i=>S.r[i.id]===3);
+  if(!list.length){toast("قيّم المؤشرات أولًا");return;}
+  const ta=document.querySelector(`[data-k="${k}"]`);
+  ta.value=list.map(i=>"• "+i.txt).join("\n");S.f[k]=ta.value;save();toast("تمت التعبئة");
+}));
+
+document.getElementById("copyBtn").addEventListener("click",async()=>{
+  const f=S.f,vals=Object.values(S.r);
+  const a=vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:0;
+  let t=`استمارة التقويم الذاتي لتفعيل مهارات التفكير العليا\n\n`;
+  t+=`اسم المعلم/ـة: ${f.teacher||""}\nالمدرسة: ${f.school||""}\nالصف: ${f.grade||""}\nالتخصص: ${f.subject||""}\nالدرس/الوحدة: ${f.lesson||""}\nالتاريخ: ${f.date||""}\n\n`;
+  DATA.forEach((d,di)=>{
+    t+=`${di+1}. ${d.t}\n`;
+    ITEMS.filter(i=>i.d===di).forEach(i=>t+=`  ${i.id}) ${i.txt} ← ${S.r[i.id]?S.r[i.id]+" ("+LBL[S.r[i.id]]+")":"—"}\n`);
+    t+="\n";
+  });
+  if(vals.length)t+=`المتوسط العام: ${a.toFixed(2)} من 5 (${Math.round(a/5*100)}%) — المستوى: ${level(a)}\n\n`;
+  t+=`الممارسات الناجحة:\n${f.success||""}\n\nأولويات التطوير:\n${f.priorities||""}\n\nخطوة التحسين القادمة:\n${f.next||""}\n\n`;
+  t+=`اسم المعلم/ـة: ${f.teacherSign||""}\nاسم مدير/ة المدرسة: ${f.principal||""}\n`;
+  try{await navigator.clipboard.writeText(t);toast("تم نسخ التقرير ✓");}
+  catch(e){
+    const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();
+    let ok=false;try{ok=document.execCommand("copy");}catch(_){}
+    ta.remove();toast(ok?"تم نسخ التقرير ✓":"تعذّر النسخ في هذا العارض");
+  }
+});
+
+const modal=document.getElementById("modal");
+resetBtn.onclick=()=>modal.classList.add("show");
+noReset.onclick=()=>modal.classList.remove("show");
+yesReset.onclick=()=>{S={r:{},f:{...DEF}};save();document.querySelectorAll("[data-k]").forEach(el=>el.value=S.f[el.dataset.k]||"");render();modal.classList.remove("show");toast("تم المسح");};
+</script>
+</body>
+</html>
